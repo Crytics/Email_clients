@@ -1,0 +1,97 @@
+########################################
+# Automated Email Invoicing Tool
+# ------------------------------------------
+# Created by  : Adam Nguyen
+# Updated by  : Adam Nguyen
+# Created at  : 12/05/2015
+# Updated at  : xx/xx/xxxx
+# Description : Tool for email invoices
+########################################
+
+#Import libraries
+import getpass, smtplib, imaplib, os, csv, re, mimetypes
+import email, email.mime.application
+from email.MIMEMultipart import MIMEMultipart
+from email.MIMEText import MIMEText
+from email.MIMEImage import MIMEImage
+from email.MIMEBase import MIMEBase
+from email.mime.audio import MIMEAudio
+from email import Encoders
+
+#Get data from CSV
+path = "C:/Users/Adam/Desktop/Invoice"
+os.chdir(path)
+print(os.getcwd())
+
+#Handles
+def import_gd_dump(input_file):
+    """Return a list ('clients') of dict objects, taken from an Invoice CSV file."""
+    gd_extract = csv.DictReader(open(input_file), dialect = 'excel')
+    clients = []
+    for row in gd_extract:
+        clients.append(row)
+    return clients
+
+def email_create(fromaddr, toaddrs, subject, body, attachment):
+#Compose email
+        emailMsg = email.MIMEMultipart.MIMEMultipart('mixed')
+        emailMsg['Subject'] = subject
+        emailMsg['From'] = fromaddr
+        #emailMsg['To'] = ', '.join(toaddrs)
+        #emailMsg['Cc'] = ', '.join(cc)
+        emailMsg.attach(email.mime.text.MIMEText(body,'html')) #Format in boilerplate
+
+#PDF attachment
+        filename=attachment
+        fp=open(filename,'rb')
+        att = email.mime.application.MIMEApplication(fp.read(), _subtype="octet-stream")
+        fp.close()
+        att.add_header('Content-Disposition','attachment; filename = "%s"' % os.path.basename(attachment))
+        emailMsg.attach(att)
+
+#Send mail
+        smtpserver = 'localhost'
+        server = smtplib.SMTP('smtp.gmail.com:587')
+        server.starttls()
+        server.login(username, password)
+        server.sendmail(fromaddr, toaddrs, emailMsg.as_string())
+        server.quit()
+
+
+#Inputs
+if __name__=="__main__":
+    username = raw_input('Enter gmail username: ')
+    password = getpass.getpass('Enter your password: ')
+    fromaddr = raw_input('Enter a "from" address: ')
+    subject = raw_input('Enter your email subject: ')
+    #format = raw_input('The format is txt or html?')
+    question = raw_input('Do you have any files to attach? (Yes/No): ')
+    mylist=[]
+    counter = 0
+
+    if question == 'Yes' or question == 'yes':
+        fn = raw_input('Enter filename: ')
+        data_raw = import_gd_dump(fn)
+
+        #Create email html body
+        body = []
+        for client in data_raw:
+            body.append(
+"""
+Dear Mr. and Mrs. %s,
+
+<p>We have attached the November 2015 Invoice for %s.
+<p>Please take a look at it and let us know if you have any questions or concerns. If the invoices are correct, there is nothing further you need to do. We will go ahead and put the payment through our online payment system, Stripe, three to five days from now.
+<p>This message is just to let you know the charges that will be made a few days from now.
+<p>If you have any questions or concerns, feel free to let us know.
+
+<p>Sincerely,
+<br>Bethany & Sheena
+<br>Tokyo Academics Team - Billing
+""" % (client["Parent"].split()[-1], client["Student"].split()[0]))
+
+    #Run through client lists
+    for (clients, invoice) in zip(body, data_raw):
+        email_create(fromaddr, invoice["Email"], subject, clients, invoice["Invoice"] + '.pdf')
+        counter += 1
+        print counter, ' of ', len(data_raw), " invoices sent."
