@@ -4,7 +4,7 @@
 # Created by  : Adam Nguyen
 # Updated by  : Adam Nguyen
 # Created at  : 12/05/2015
-# Updated at  : xx/xx/xxxx
+# Updated at  : 12/11/2015
 # Description : Tool for email invoices
 ########################################
 
@@ -78,16 +78,7 @@ if __name__=="__main__":
         for client in data_raw:
             body.append(
 """
-Dear Mr. and Mrs. %s,
-
-<p>We have attached the November 2015 Invoice for %s.
-<p>Please take a look at it and let us know if you have any questions or concerns. If the invoices are correct, there is nothing further you need to do. We will go ahead and put the payment through our online payment system, Stripe, three to five days from now.
-<p>This message is just to let you know the charges that will be made a few days from now.
-<p>If you have any questions or concerns, feel free to let us know.
-
-<p>Sincerely,
-<br>Bethany & Sheena
-<br>Tokyo Academics Team - Billing
+<insert message here>
 """ % (client["Parent"].split()[-1], client["Student"].split()[0]))
 
     #Run through client lists
