@@ -8,7 +8,7 @@
 # Description : Tool for email invoices
 ########################################
 
-#Import libraries
+##Import libraries
 import getpass, smtplib, imaplib, os, csv, re, mimetypes
 import email, email.mime.application
 from email.MIMEMultipart import MIMEMultipart
@@ -18,12 +18,12 @@ from email.MIMEBase import MIMEBase
 from email.mime.audio import MIMEAudio
 from email import Encoders
 
-#Get data from CSV
+##Get data from CSV
 path = "C:/Users/Adam/Desktop/Invoice"
 os.chdir(path)
 print(os.getcwd())
 
-#Handles
+##Handles
 def import_gd_dump(input_file):
     """Return a list ('clients') of dict objects, taken from an Invoice CSV file."""
     gd_extract = csv.DictReader(open(input_file), dialect = 'excel')
@@ -32,8 +32,8 @@ def import_gd_dump(input_file):
         clients.append(row)
     return clients
 
-def email_create(fromaddr, toaddrs, subject, body, attachment):
 #Compose email
+def email_create(fromaddr, toaddrs, subject, body, attachment):
         emailMsg = email.MIMEMultipart.MIMEMultipart('mixed')
         emailMsg['Subject'] = subject
         emailMsg['From'] = fromaddr
@@ -58,7 +58,7 @@ def email_create(fromaddr, toaddrs, subject, body, attachment):
         server.quit()
 
 
-#Inputs
+##Inputs
 if __name__=="__main__":
     username = raw_input('Enter gmail username: ')
     password = getpass.getpass('Enter your password: ')
